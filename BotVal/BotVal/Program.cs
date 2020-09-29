@@ -7,14 +7,15 @@ using System.Timers;
 using System.Collections.Generic;
 using System.Xml;
 using System.Data.SqlClient;
+using BotVal;
 
-namespace TeleBot
+namespace BotVal
 {
     class Program
     {
-        static SqlConnection connection = new SqlConnection("Server=tcp:azurez.database.windows.net,1433;Initial Catalog=Zakha_db;Persist Security Info=False;User ID=admnz;Password=a73IR001;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+        static SqlConnection connection = new SqlConnection("Server=tcp:azurez.database.windows.net,1433;Initial Catalog=Zakha_db;Persist Security Info=False;User ID=admnz;Password=a73IR00l;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
         static TelegramBotClient client;
-        static List<long> chats = new List<long>();
+        static List<Client> chats = new List<Client>();
 
         static void Main(string[] args)
         {
@@ -30,7 +31,7 @@ namespace TeleBot
 
 
 
-            Timer task = new Timer(1800000);
+            Timer task = new Timer(10000);
             task.Elapsed += SendInf;
             task.Start();
             Console.Read();
@@ -50,7 +51,8 @@ namespace TeleBot
 
                     while (reader.Read())
                     {
-                        chats.Add(reader.GetInt32(1));
+                        Console.WriteLine(reader.GetInt32(1)+" "+reader.GetDecimal(2));
+                        chats.Add(new Client(reader.GetInt32(1), reader.GetDecimal(2)));
                     }
                     //connection.Close();
 
@@ -102,13 +104,13 @@ namespace TeleBot
 
 
 
-            using (SqlCommand command = new SqlCommand($"INSERT INTO Client([ChatId],[Interval],[IsUSD],[IsEur],[ISRUB],[ISBTC],[CMessage]) VALUES ({Idclient},60000,true,true,true,true,'Hello')", connection))
+            using (SqlCommand command = new SqlCommand($"INSERT INTO Client([ChatId],[Interval],[IsUSD],[IsEur],[ISRUB],[ISBTC],[CMessage]) VALUES ({Idclient},60000,1,1,1,1,'Hello')", connection))
             {
                 try
                 {
 
                     command.ExecuteNonQuery();
-                    chats.Add(Idclient);
+                    chats.Add(new Client(Idclient));
                 }
                 catch (Exception ex)
                 {
@@ -132,15 +134,20 @@ namespace TeleBot
             string mess = "";
             while (xmlread.Read())
             {
-                if (xmlread.GetAttribute("buy").ToString().Length > 0)
+                if (xmlread.AttributeCount>3)
                 {
                     mess += xmlread.GetAttribute("ccy") + " " + xmlread.GetAttribute("base_ccy") + " Buy:" + xmlread.GetAttribute("buy") + " Sale:" + xmlread.GetAttribute("sale") + Environment.NewLine;
                 }
             }
             for (int k = 0; k < chats.Count; k++)
             {
-                Console.WriteLine(chats[k]);
-                client.SendTextMessageAsync(chats[k], mess + Environment.NewLine + DateTime.Now);
+                chats[k].PingInterval();
+                if (chats[k].CurrentInterval == 0)
+                {
+                    Console.WriteLine(chats[k].ClientId);
+                    client.SendTextMessageAsync(chats[k].ClientId, mess + Environment.NewLine + DateTime.Now);
+                    chats[k].ResetI();
+                }
             }
             Console.WriteLine("___________________________");
 
@@ -180,6 +187,7 @@ namespace TeleBot
             Console.WriteLine($"{e.Message.Text}");
             if (!HaveHim(e.Message.Chat.Id))
             {
+                
                 AddClient(e.Message.Chat.Id);
             }
 
@@ -189,14 +197,44 @@ namespace TeleBot
                     {
                         var somekey = new ReplyKeyboardMarkup(new[]
                         {
-                            new KeyboardButton("Set Interval"),
+                            new KeyboardButton("Set Interval"),//AAO Kostil
                             new KeyboardButton("Set Valuts"),
-                            new KeyboardButton("Set Word")
+                            new KeyboardButton("Set Word"),
+                           
                         });
                         client.SendTextMessageAsync(e.Message.Chat.Id, "Choose", replyMarkup: somekey);
                     }
                     break;
-
+                case "Set Interval":
+                    {
+                        var somekey = new ReplyKeyboardMarkup(new[]
+                        {
+                            new KeyboardButton("Set 1 minutes"),
+                            new KeyboardButton("Set 30 minutes"),
+                            new KeyboardButton("Set 24 hours")
+                        });
+                        
+                        client.SendTextMessageAsync(e.Message.Chat.Id, "Choose", replyMarkup: somekey);
+                    }
+                    break;
+                case "Set 1 minutes":
+                    {
+                        ResetInterval(e.Message.Chat.Id,60000);
+                        client.SendTextMessageAsync(e.Message.Chat.Id, "I set interval of sending info at 1 minutes");
+                    }
+                    break;
+                case "Set 30 minutes":
+                    {
+                        ResetInterval(e.Message.Chat.Id, 30*60000);
+                        client.SendTextMessageAsync(e.Message.Chat.Id, "I set interval of sending info at 30 minutes");
+                    }
+                    break;
+                case "Set 24 hours":
+                    {
+                        ResetInterval(e.Message.Chat.Id, 24*60*60000);
+                        client.SendTextMessageAsync(e.Message.Chat.Id, "I set interval of sending info at 24 hours");
+                    }
+                    break;
                 case "/help":
                     {
                         client.SendTextMessageAsync(e.Message.Chat.Id, "There all my commands: " + Environment.NewLine + "/menu- my settings" + Environment.NewLine + "/help- my commands");
@@ -218,12 +256,26 @@ namespace TeleBot
 
         }
 
+        static public void ResetInterval(long ChatId,decimal interval)
+        {
+            for(int h=0;h<chats.Count;h++)
+            {
+                if(chats[h].ClientId==ChatId)
+                {
+                    chats[h].ChangeInterval(interval);
+                    break;
+                }
+            }
+        }
+
         public static bool HaveHim(long nwe)
         {
             for (int k = 0; k < chats.Count; k++)
             {
-                if (chats[k] == nwe)
+                
+                if (chats[k].ClientId == nwe)
                 {
+                    
                     return true;
                 }
             }

@@ -1,0 +1,12 @@
+C:\Users\admnz\source\repos\BotValuts\BotVal\BotVal\bin\Debug\BotVal.exe.config
+C:\Users\admnz\source\repos\BotValuts\BotVal\BotVal\bin\Debug\BotVal.exe
+C:\Users\admnz\source\repos\BotValuts\BotVal\BotVal\bin\Debug\BotVal.pdb
+C:\Users\admnz\source\repos\BotValuts\BotVal\BotVal\bin\Debug\Newtonsoft.Json.dll
+C:\Users\admnz\source\repos\BotValuts\BotVal\BotVal\bin\Debug\Telegram.Bot.dll
+C:\Users\admnz\source\repos\BotValuts\BotVal\BotVal\bin\Debug\Newtonsoft.Json.xml
+C:\Users\admnz\source\repos\BotValuts\BotVal\BotVal\bin\Debug\Telegram.Bot.xml
+C:\Users\admnz\source\repos\BotValuts\BotVal\BotVal\obj\Debug\BotVal.csprojAssemblyReference.cache
+C:\Users\admnz\source\repos\BotValuts\BotVal\BotVal\obj\Debug\BotVal.csproj.CoreCompileInputs.cache
+C:\Users\admnz\source\repos\BotValuts\BotVal\BotVal\obj\Debug\BotVal.csproj.CopyComplete
+C:\Users\admnz\source\repos\BotValuts\BotVal\BotVal\obj\Debug\BotVal.exe
+C:\Users\admnz\source\repos\BotValuts\BotVal\BotVal\obj\Debug\BotVal.pdb
