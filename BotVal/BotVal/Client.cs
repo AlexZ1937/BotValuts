@@ -11,20 +11,20 @@ namespace BotVal
         public long ClientId;
         public decimal Interval;
         public decimal CurrentInterval;
-        public bool IsUSD;
-        public bool IsEUR;
-        public bool IsRUB;
-        public bool IsBTC;
+        public int IsUSD;
+        public int IsEUR;
+        public int IsRUB;
+        public int IsBTC;
         public string word;
         public Client(long ClientId)
         {
             this.ClientId = ClientId;
             this.Interval = 60000;
             this.CurrentInterval = 60000;
-            this.IsUSD=true;
-            this.IsEUR = true;
-            this.IsRUB = true;
-            this.IsBTC = true;
+            this.IsUSD=1;
+            this.IsEUR = 1;
+            this.IsRUB = 1;
+            this.IsBTC = 1;
             this.word = "Hello";
         }
 
@@ -33,10 +33,10 @@ namespace BotVal
             this.ClientId = ClientId;
             this.Interval = Interval;
             this.CurrentInterval = Interval;
-            this.IsUSD = true;
-            this.IsEUR = true;
-            this.IsRUB = true;
-            this.IsBTC = true;
+            this.IsUSD = 1;
+            this.IsEUR = 1;
+            this.IsRUB = 1;
+            this.IsBTC = 1;
             this.word = "Hello";
         }
 

@@ -27,6 +27,7 @@ namespace BotVal
 
             client = new TelegramBotClient("1322903188:AAHNRgjAopnGninojF8XWd8xtUO3EmjswIg");
             client.OnMessage += getMsg;
+           
             client.StartReceiving();
 
 
@@ -51,7 +52,7 @@ namespace BotVal
 
                     while (reader.Read())
                     {
-                        Console.WriteLine(reader.GetInt32(1)+" "+reader.GetDecimal(2));
+                       
                         chats.Add(new Client(reader.GetInt32(1), reader.GetDecimal(2)));
                     }
                     //connection.Close();
@@ -125,6 +126,33 @@ namespace BotVal
         }
 
 
+        private static void UpdateClient(decimal interval, int IsUSD, int IsEUR, int IsRUB, int IsBTC,string word, long chatId)
+        {
+
+            connection.Open();
+
+            using (SqlCommand command = new SqlCommand($"UPDATE [Client] SET [Interval]={interval},[IsUSD]={IsUSD},[IsEur]={IsEUR}," +
+                $"[ISRUB]={IsRUB},[ISBTC]={IsBTC},[CMessage]='{word}' Where [ChatId]={chatId}", connection))
+            {
+                try
+                {
+
+                    command.ExecuteNonQuery();
+                  
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
+            }
+
+            connection.Close();
+
+        }
+
+
+
         private static void SendInf(object sender, ElapsedEventArgs e)
         {
 
@@ -191,65 +219,87 @@ namespace BotVal
                 AddClient(e.Message.Chat.Id);
             }
 
-            switch (e.Message.Text)
+            if (e.Message.ReplyToMessage.Text == "Answer on THIS message by new word")
             {
-                case "/menu":
-                    {
-                        var somekey = new ReplyKeyboardMarkup(new[]
+                Client tmp = GetClient(e.Message.Chat.Id);
+                UpdateClient(tmp.Interval, tmp.IsUSD, tmp.IsEUR, tmp.IsRUB, tmp.IsBTC, e.Message.Text, tmp.ClientId);
+                GetClient(e.Message.Chat.Id).word = e.Message.Text;
+            }
+            else
+            {
+
+                switch (e.Message.Text)
+                {
+                    case "/menu":
                         {
+                            var somekey = new ReplyKeyboardMarkup(new[]
+                            {
                             new KeyboardButton("Set Interval"),//AAO Kostil
                             new KeyboardButton("Set Valuts"),
                             new KeyboardButton("Set Word"),
-                           
+
                         });
-                        client.SendTextMessageAsync(e.Message.Chat.Id, "Choose", replyMarkup: somekey);
-                    }
-                    break;
-                case "Set Interval":
-                    {
-                        var somekey = new ReplyKeyboardMarkup(new[]
+                            client.SendTextMessageAsync(e.Message.Chat.Id, "Choose", replyMarkup: somekey);
+                        }
+                        break;
+                    case "Set Word":
                         {
+
+                            client.SendTextMessageAsync(e.Message.Chat.Id, "Answer on THIS message by new word");
+                        }
+                        break;
+                    case "Set Interval":
+                        {
+                            var somekey = new ReplyKeyboardMarkup(new[]
+                            {
                             new KeyboardButton("Set 1 minutes"),
                             new KeyboardButton("Set 30 minutes"),
                             new KeyboardButton("Set 24 hours")
                         });
-                        
-                        client.SendTextMessageAsync(e.Message.Chat.Id, "Choose", replyMarkup: somekey);
-                    }
-                    break;
-                case "Set 1 minutes":
-                    {
-                        ResetInterval(e.Message.Chat.Id,60000);
-                        client.SendTextMessageAsync(e.Message.Chat.Id, "I set interval of sending info at 1 minutes");
-                    }
-                    break;
-                case "Set 30 minutes":
-                    {
-                        ResetInterval(e.Message.Chat.Id, 30*60000);
-                        client.SendTextMessageAsync(e.Message.Chat.Id, "I set interval of sending info at 30 minutes");
-                    }
-                    break;
-                case "Set 24 hours":
-                    {
-                        ResetInterval(e.Message.Chat.Id, 24*60*60000);
-                        client.SendTextMessageAsync(e.Message.Chat.Id, "I set interval of sending info at 24 hours");
-                    }
-                    break;
-                case "/help":
-                    {
-                        client.SendTextMessageAsync(e.Message.Chat.Id, "There all my commands: " + Environment.NewLine + "/menu- my settings" + Environment.NewLine + "/help- my commands");
-                    }
-                    break;
-                case "/start":
-                    {
-                        client.SendTextMessageAsync(e.Message.Chat.Id, "There all my commands: " + Environment.NewLine + "/menu- my settings" + Environment.NewLine + "/help- my commands");
-                    }
-                    break;
-                default:
-                    {
-                        client.SendTextMessageAsync(e.Message.Chat.Id, "Hello!");
-                    }
-                    break;
+
+                            client.SendTextMessageAsync(e.Message.Chat.Id, "Choose", replyMarkup: somekey);
+                        }
+                        break;
+                    case "Set 1 minutes":
+                        {
+                            Client tmp = GetClient(e.Message.Chat.Id);
+                            UpdateClient(60000, tmp.IsUSD, tmp.IsEUR, tmp.IsRUB, tmp.IsBTC, tmp.word, tmp.ClientId);
+                            ResetInterval(e.Message.Chat.Id, 60000);
+                            client.SendTextMessageAsync(e.Message.Chat.Id, "I set interval of sending info at 1 minutes");
+                        }
+                        break;
+                    case "Set 30 minutes":
+                        {
+                            Client tmp = GetClient(e.Message.Chat.Id);
+                            UpdateClient(30 * 60000, tmp.IsUSD, tmp.IsEUR, tmp.IsRUB, tmp.IsBTC, tmp.word, tmp.ClientId);
+                            ResetInterval(e.Message.Chat.Id, 30 * 60000);
+                            client.SendTextMessageAsync(e.Message.Chat.Id, "I set interval of sending info at 30 minutes");
+                        }
+                        break;
+                    case "Set 24 hours":
+                        {
+                            Client tmp = GetClient(e.Message.Chat.Id);
+                            UpdateClient(24 * 60 * 60000, tmp.IsUSD, tmp.IsEUR, tmp.IsRUB, tmp.IsBTC, tmp.word, tmp.ClientId);
+                            ResetInterval(e.Message.Chat.Id, 24 * 60 * 60000);
+                            client.SendTextMessageAsync(e.Message.Chat.Id, "I set interval of sending info at 24 hours");
+                        }
+                        break;
+                    case "/help":
+                        {
+                            client.SendTextMessageAsync(e.Message.Chat.Id, "There all my commands: " + Environment.NewLine + "/menu- my settings" + Environment.NewLine + "/help- my commands");
+                        }
+                        break;
+                    case "/start":
+                        {
+                            client.SendTextMessageAsync(e.Message.Chat.Id, "There all my commands: " + Environment.NewLine + "/menu- my settings" + Environment.NewLine + "/help- my commands");
+                        }
+                        break;
+                    default:
+                        {
+                            client.SendTextMessageAsync(e.Message.Chat.Id, GetClient(e.Message.Chat.Id).word);
+                        }
+                        break;
+                } 
             }
 
 
@@ -266,6 +316,20 @@ namespace BotVal
                     break;
                 }
             }
+        }
+
+        public static Client GetClient(long chatId)
+        {
+            for (int k = 0; k < chats.Count; k++)
+            {
+
+                if (chats[k].ClientId == chatId)
+                {
+
+                    return chats[k];
+                }
+            }
+            return null;
         }
 
         public static bool HaveHim(long nwe)
