@@ -28,7 +28,7 @@ namespace BotVal
             this.word = "Hello";
         }
 
-        public Client(long ClientId, decimal Interval)
+        public Client(long ClientId, decimal Interval,string phrase)
         {
             this.ClientId = ClientId;
             this.Interval = Interval;
@@ -37,7 +37,7 @@ namespace BotVal
             this.IsEUR = 1;
             this.IsRUB = 1;
             this.IsBTC = 1;
-            this.word = "Hello";
+            this.word = phrase;
         }
 
 
@@ -47,9 +47,9 @@ namespace BotVal
             this.CurrentInterval = Interval;
         }
 
-        public void PingInterval()
+        public void PingInterval(decimal ping)
         {
-            CurrentInterval = CurrentInterval - 10000;
+            CurrentInterval = CurrentInterval - ping;
         }
         public void ResetI()
         {

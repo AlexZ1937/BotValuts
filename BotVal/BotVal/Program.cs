@@ -13,6 +13,7 @@ namespace BotVal
 {
     class Program
     {
+        static double intervalping = 60000;
         static SqlConnection connection = new SqlConnection("Server=tcp:azurez.database.windows.net,1433;Initial Catalog=Zakha_db;Persist Security Info=False;User ID=admnz;Password=a73IR00l;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
         static TelegramBotClient client;
         static List<Client> chats = new List<Client>();
@@ -32,7 +33,7 @@ namespace BotVal
 
 
 
-            Timer task = new Timer(10000);
+            Timer task = new Timer(intervalping);
             task.Elapsed += SendInf;
             task.Start();
             Console.Read();
@@ -53,7 +54,7 @@ namespace BotVal
                     while (reader.Read())
                     {
                        
-                        chats.Add(new Client(reader.GetInt32(1), reader.GetDecimal(2)));
+                        chats.Add(new Client(reader.GetInt32(1), reader.GetDecimal(2),reader.GetString(7)));
                     }
                     //connection.Close();
 
@@ -169,7 +170,7 @@ namespace BotVal
             }
             for (int k = 0; k < chats.Count; k++)
             {
-                chats[k].PingInterval();
+                chats[k].PingInterval(Convert.ToDecimal(intervalping));
                 if (chats[k].CurrentInterval == 0)
                 {
                     Console.WriteLine(chats[k].ClientId);
@@ -219,14 +220,9 @@ namespace BotVal
                 AddClient(e.Message.Chat.Id);
             }
 
-            if (e.Message.ReplyToMessage.Text == "Answer on THIS message by new word")
-            {
-                Client tmp = GetClient(e.Message.Chat.Id);
-                UpdateClient(tmp.Interval, tmp.IsUSD, tmp.IsEUR, tmp.IsRUB, tmp.IsBTC, e.Message.Text, tmp.ClientId);
-                GetClient(e.Message.Chat.Id).word = e.Message.Text;
-            }
-            else
-            {
+
+          
+         
 
                 switch (e.Message.Text)
                 {
@@ -296,11 +292,28 @@ namespace BotVal
                         break;
                     default:
                         {
-                            client.SendTextMessageAsync(e.Message.Chat.Id, GetClient(e.Message.Chat.Id).word);
+
+                            try
+                            {
+                                if (e.Message.ReplyToMessage.Text == "Answer on THIS message by new word")
+                                {
+                                    Client tmp = GetClient(e.Message.Chat.Id);
+                                    UpdateClient(tmp.Interval, tmp.IsUSD, tmp.IsEUR, tmp.IsRUB, tmp.IsBTC, e.Message.Text, tmp.ClientId);
+                                    GetClient(e.Message.Chat.Id).word = e.Message.Text;
+                                }
+                                else
+                                {
+                                    client.SendTextMessageAsync(e.Message.Chat.Id, GetClient(e.Message.Chat.Id).word);
+                                }
+                            }
+                            catch(NullReferenceException ex)
+                            {
+                                client.SendTextMessageAsync(e.Message.Chat.Id, GetClient(e.Message.Chat.Id).word);
+                            }
                         }
                         break;
                 } 
-            }
+            
 
 
 
