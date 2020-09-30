@@ -38,7 +38,7 @@ namespace BotVal
             this.IsRUB = 1;
             this.IsBTC = 1;
             this.word = phrase;
-        }
+        }   
 
 
         public void ChangeInterval(decimal Interval)
