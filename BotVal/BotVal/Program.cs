@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Xml;
 using System.Data.SqlClient;
 using BotVal;
+using Microsoft.Office.Interop.Excel;
 
 namespace BotVal
 {
@@ -20,8 +21,8 @@ namespace BotVal
 
         static void Main(string[] args)
         {
-
-
+            
+          
             GetUsers();
             
 
@@ -199,7 +200,11 @@ namespace BotVal
             Console.WriteLine("___________________________");
 
 
-
+            if (DateTime.Now.Hour == 3 && DateTime.Now.Minute == 0 && DateTime.Now.Second==0)
+            {
+                ExcelEz();
+                Console.WriteLine("ExcelDataSaved"+DateTime.Now);
+            }    
 
 
         }
@@ -460,6 +465,118 @@ namespace BotVal
             }
             return false;
         }
+
+
+
+
+
+
+
+        static public void ExcelEz()
+        {
+            Application ex;
+            Worksheet sheet;
+            ex = new Application();
+
+            ex.Visible = true;
+
+            //Количество листов в рабочей книге
+            //Добавить рабочую книгу
+            Workbook workBook;
+
+
+
+
+            string URL = "https://api.privatbank.ua/p24api/pubinfo?exchange&coursid=5";
+            XmlTextReader xmlread = new XmlTextReader(URL);
+
+            string[,] nums2 = { { "", "", "", "", DateTime.Now.ToString() }, { "", "", "", "", DateTime.Now.ToString() }, { "", "", "", "", DateTime.Now.ToString() }, { "", "", "", "", DateTime.Now.ToString() } };
+            int k = 0;
+            while (xmlread.Read())
+            {
+
+                if (xmlread.AttributeCount > 3)
+                {
+                    nums2[k, 0] = xmlread.GetAttribute("ccy");
+                    nums2[k, 1] = xmlread.GetAttribute("base_ccy");
+                    nums2[k, 2] = xmlread.GetAttribute("buy");
+                    nums2[k, 3] = xmlread.GetAttribute("sale");
+                    k++;
+                }
+            }
+
+
+            if (File.Exists("C:\\Users\\admnz\\source\\repos\\Excel\\Excel\\bin\\Debug\\test.xlsx"))
+            {
+                workBook = ex.Workbooks.Open("C:\\Users\\admnz\\source\\repos\\Excel\\Excel\\bin\\Debug\\test.xlsx");
+                sheet = ex.Worksheets.get_Item(1);
+                int tmpi = 0;
+                int filed = 0;
+
+                for (int i = 1; i < sheet.Cells.Rows.Count; i++)
+                {
+
+                    if (sheet.Cells[i, 1].Text == String.Format(""))
+                    {
+                        filed = i;
+                        break;
+                    }
+                }
+
+
+                for (int i = filed; i <= filed + 3; i++)
+                {
+
+                    for (int j = 1; j <= 5; j++)
+                    {
+                        Console.WriteLine("Add?");
+                        string tm = String.Format(nums2[tmpi, j - 1]);
+                        Console.WriteLine();
+                        sheet.Cells[i, j] = tm;
+                    }
+                    tmpi++;
+                    tmpi = tmpi;
+                }
+
+                workBook.Save();
+                workBook.Close();
+                ex.Quit();
+
+            }
+            else
+            {
+
+                Console.WriteLine("This is NEW");
+
+                ex.SheetsInNewWorkbook = 1;
+                workBook = ex.Workbooks.Add(Type.Missing);
+                sheet = ex.Worksheets.get_Item(1);
+                sheet.Activate();
+                ex.DisplayAlerts = false;
+                //Получаем первый лист документа (счет начинается с 1)
+                //Название листа (вкладки снизу)
+                sheet.Name = "Отчет за 13.12.2017";
+                sheet.Cells[1, 1] = String.Format("First Valut");
+                sheet.Cells[1, 2] = String.Format("Second Valut");
+                sheet.Cells[1, 3] = String.Format("SELL");
+                sheet.Cells[1, 4] = String.Format("BUY");
+                sheet.Cells[1, 5] = String.Format("Date");
+                for (int i = 2; i <= 5; i++)
+                {
+                    for (int j = 1; j <= 5; j++)
+                    {
+                        Console.WriteLine("Add?");
+                        sheet.Cells[i, j] = String.Format(nums2[i - 2, j - 1]);
+                    }
+                }
+
+                workBook.SaveAs("C:\\Users\\admnz\\source\\repos\\Excel\\Excel\\bin\\Debug\\test.xlsx");
+                workBook.Close();
+                ex.Quit();
+            }
+
+
+        }
         /// <summary>
         /// Add question in local data base file
         /// </summary>
@@ -468,6 +585,11 @@ namespace BotVal
 
     }
 }
+
+
+
+
+
 
 
 
