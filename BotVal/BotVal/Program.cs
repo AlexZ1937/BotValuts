@@ -410,13 +410,12 @@ namespace BotVal
                         
                         GenerateExcelByDate(1);
                         FileStream fileStream = System.IO.File.Open("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\tmp.xlsx", FileMode.Open);
-                        
-                        
-                        client.SendDocumentAsync(e.Message.Chat.Id, new InputOnlineFile(fileStream,"hello.xlsx"));
+
+                        client.SendDocumentAsync(e.Message.Chat.Id, new InputOnlineFile(fileStream, "hello.xlsx"));
                         //fileStream.Close();
 
                         //System.IO.File.Delete("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\tmp.xlsx");
-                        
+
                     }
                     break;
                 case "Get info for 5 days":
@@ -424,35 +423,32 @@ namespace BotVal
                         /*await*/ GenerateExcelByDate(5);
                         FileStream fileStream = System.IO.File.Open("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\tmp.xlsx", FileMode.Open);
 
-
                         client.SendDocumentAsync(e.Message.Chat.Id, new InputOnlineFile(fileStream, "hello.xlsx"));
                     }
                     break;
                 case "Get info for 1 week":
                     {
-                    //    GenerateExcelByDate(7);
-                    //    FileStream fileStream = System.IO.File.Open("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\tmp.xlsx", FileMode.Open);
+                        GenerateExcelByDate(7);
+                        FileStream fileStream = System.IO.File.Open("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\tmp.xlsx", FileMode.Open);
 
-
-                    //    client.SendDocumentAsync(e.Message.Chat.Id, new InputOnlineFile(fileStream, "hello.xlsx"));
+                        client.SendDocumentAsync(e.Message.Chat.Id, new InputOnlineFile(fileStream, "hello.xlsx"));
                     }
                     break;
                 case "Get info for 2 weeks":
                     {
-                        //GenerateExcelByDate(14);
-                        //FileStream fileStream = System.IO.File.Open("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\tmp.xlsx", FileMode.Open);
+                        GenerateExcelByDate(14);
+                        FileStream fileStream = System.IO.File.Open("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\tmp.xlsx", FileMode.Open);
 
-
-                        //client.SendDocumentAsync(e.Message.Chat.Id, new InputOnlineFile(fileStream, "hello.xlsx"));
+                        client.SendDocumentAsync(e.Message.Chat.Id, new InputOnlineFile(fileStream, "hello.xlsx"));
                     }
                     break;
                 case "Get info for mounth":
                     {
-                        //GenerateExcelByDate(30);
-                        //FileStream fileStream = System.IO.File.Open("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\tmp.xlsx", FileMode.Open);
-
-
-                        //client.SendDocumentAsync(e.Message.Chat.Id, new InputOnlineFile(fileStream, "hello.xlsx"));
+                        GenerateExcelByDate(30);
+                        FileStream fileStream = System.IO.File.Open("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\tmp.xlsx", FileMode.Open);
+                        
+                            client.SendDocumentAsync(e.Message.Chat.Id, new InputOnlineFile(fileStream, "hello.xlsx"));
+                        
                     }
                     break;
                 default:
@@ -522,7 +518,7 @@ namespace BotVal
                     int tmpk = filed - daycount * 4;
                     if (filed < daycount*4)
                     {
-                        tmpk = 0;
+                        tmpk = 2;
 
                     }
 
@@ -574,7 +570,7 @@ namespace BotVal
                     {
                         tmpk = filed;
                     }
-                    for (int i = 2; i <= tmpk; i++)
+                    for (int i = 2; i < tmpk; i++)
                     {
                         for (int j = 1; j <= 5; j++)
                         {
