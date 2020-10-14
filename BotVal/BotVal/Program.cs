@@ -9,6 +9,10 @@ using System.Xml;
 using System.Data.SqlClient;
 using BotVal;
 using Microsoft.Office.Interop.Excel;
+using System.Linq;
+using Telegram.Bot.Types.InputFiles;
+using Telegram.Bot.Types;
+using System.Threading.Tasks;
 
 namespace BotVal
 {
@@ -22,7 +26,6 @@ namespace BotVal
         static void Main(string[] args)
         {
             
-          
             GetUsers();
             
 
@@ -152,7 +155,7 @@ namespace BotVal
 
         }
 
-
+       
 
         private static void SendInf(object sender, ElapsedEventArgs e)
         {
@@ -167,6 +170,9 @@ namespace BotVal
                 {
                     mess.Add(xmlread.GetAttribute("ccy") + " " + xmlread.GetAttribute("base_ccy") + " Buy:" + xmlread.GetAttribute("buy") + " Sale:" + xmlread.GetAttribute("sale") + Environment.NewLine);                }
             }
+            
+           
+
             for (int k = 0; k < chats.Count; k++)
             {
                 chats[k].PingInterval(Convert.ToDecimal(intervalping));
@@ -197,16 +203,17 @@ namespace BotVal
                     chats[k].ResetI();
                 }
             }
-            Console.WriteLine("___________________________");
+            Console.WriteLine("___________________________"+ DateTime.Now);
 
 
-            if (DateTime.Now.Hour == 3 && DateTime.Now.Minute == 0 && DateTime.Now.Second==0)
+            if (DateTime.Now.Hour == 15 && DateTime.Now.Minute == 30)
             {
                 ExcelEz();
                 Console.WriteLine("ExcelDataSaved"+DateTime.Now);
-            }    
-
-
+               
+            }
+        
+           
         }
 
 
@@ -243,9 +250,10 @@ namespace BotVal
                 
                 AddClient(e.Message.Chat.Id);
             }
-       
-            e.Message.Text=e.Message.Text.Replace("\\/", "");
-      
+
+            
+                e.Message.Text = e.Message.Text.Replace("\\/", "");
+          
 
 
 
@@ -375,12 +383,76 @@ namespace BotVal
                     break;
                 case "/help":
                     {
-                        client.SendTextMessageAsync(e.Message.Chat.Id, "There all my commands: " + Environment.NewLine + "/menu- my settings" + Environment.NewLine + "/help- my commands");
+                        client.SendTextMessageAsync(e.Message.Chat.Id, "There all my commands: " + Environment.NewLine + "/menu- my settings" + Environment.NewLine + "/help- my commands"+ Environment.NewLine + "/get- get Excel report ");
+                    }
+                    break;
+                case "/get":
+                    {
+                        var somekey = new ReplyKeyboardMarkup(new[]
+                         {
+                            new KeyboardButton("Get info for 1 day"),
+                            new KeyboardButton("Get info for 5 days"),
+                            new KeyboardButton("Get info for 1 week"),
+                            new KeyboardButton("Get info for 2 weeks"),
+                            new KeyboardButton("Get info for mounth")
+                        });
+
+                        client.SendTextMessageAsync(e.Message.Chat.Id, "Choose", replyMarkup: somekey);
                     }
                     break;
                 case "/start":
                     {
                         client.SendTextMessageAsync(e.Message.Chat.Id, "There all my commands: " + Environment.NewLine + "/menu- my settings" + Environment.NewLine + "/help- my commands");
+                    }
+                    break;
+                case "Get info for 1 day":
+                    {
+                        
+                        GenerateExcelByDate(1);
+                        FileStream fileStream = System.IO.File.Open("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\tmp.xlsx", FileMode.Open);
+                        
+                        
+                        client.SendDocumentAsync(e.Message.Chat.Id, new InputOnlineFile(fileStream,"hello.xlsx"));
+                        //fileStream.Close();
+
+                        //System.IO.File.Delete("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\tmp.xlsx");
+                        
+                    }
+                    break;
+                case "Get info for 5 days":
+                    {
+                        /*await*/ GenerateExcelByDate(5);
+                        FileStream fileStream = System.IO.File.Open("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\tmp.xlsx", FileMode.Open);
+
+
+                        client.SendDocumentAsync(e.Message.Chat.Id, new InputOnlineFile(fileStream, "hello.xlsx"));
+                    }
+                    break;
+                case "Get info for 1 week":
+                    {
+                    //    GenerateExcelByDate(7);
+                    //    FileStream fileStream = System.IO.File.Open("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\tmp.xlsx", FileMode.Open);
+
+
+                    //    client.SendDocumentAsync(e.Message.Chat.Id, new InputOnlineFile(fileStream, "hello.xlsx"));
+                    }
+                    break;
+                case "Get info for 2 weeks":
+                    {
+                        //GenerateExcelByDate(14);
+                        //FileStream fileStream = System.IO.File.Open("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\tmp.xlsx", FileMode.Open);
+
+
+                        //client.SendDocumentAsync(e.Message.Chat.Id, new InputOnlineFile(fileStream, "hello.xlsx"));
+                    }
+                    break;
+                case "Get info for mounth":
+                    {
+                        //GenerateExcelByDate(30);
+                        //FileStream fileStream = System.IO.File.Open("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\tmp.xlsx", FileMode.Open);
+
+
+                        //client.SendDocumentAsync(e.Message.Chat.Id, new InputOnlineFile(fileStream, "hello.xlsx"));
                     }
                     break;
                 default:
@@ -406,11 +478,148 @@ namespace BotVal
                     }
                     break;
             }
-            
 
+
+           
+
+        }
+
+
+
+
+
+        public static /*async Task<Task>*/ void GenerateExcelByDate(int daycount)
+        {
+
+
+
+            //try
+            //{
+                Application ex;
+                Worksheet sheet;
+                ex = new Application();
+                ex.Visible = true;
+                //Количество листов в рабочей книге
+                //Добавить рабочую книгу
+                Workbook workBook;
+                string[,] nums2 = new string[daycount * 4, 5];
+                if (System.IO.File.Exists("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\test.xlsx"))
+                {
+                    workBook = ex.Workbooks.Open("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\test.xlsx");
+                    sheet = ex.Worksheets.get_Item(1);
+                    int tmpi = 0;
+                    int filed = 0;
+
+                    for (int i = 1; i < sheet.Cells.Rows.Count; i++)
+                    {
+
+                        if (sheet.Cells[i, 1].Text == String.Format(""))
+                        {
+                            filed = i;
+                            break;
+                        }
+                    }
+                    int tmpk = filed - daycount * 4;
+                    if (filed < daycount*4)
+                    {
+                        tmpk = 0;
+
+                    }
+
+
+                    for (int i = tmpk; i < filed; i++)
+                    {
+
+                        for (int j = 1; j <= 5; j++)
+                        {
+                            nums2[tmpi, j - 1] = sheet.Cells[i, j].Text;
+
+                        }
+                        tmpi++;
+
+
+                    }
+
+
+                    workBook.Close();
+                    ex.Quit();
+
+
+
+
+
+
+
+                    ex = new Application();
+                    workBook = ex.Workbooks.Add(Type.Missing);
+                    sheet = ex.Worksheets.get_Item(1);
+
+
+
+                    ex.SheetsInNewWorkbook = 1;
+                    workBook = ex.Workbooks.Add(Type.Missing);
+                    sheet = ex.Worksheets.get_Item(1);
+                    sheet.Activate();
+                    ex.DisplayAlerts = false;
+                    //Получаем первый лист документа (счет начинается с 1)
+                    //Название листа (вкладки снизу)
+                    sheet.Name = "Info";
+                    sheet.Cells[1, 1] = String.Format("First Valut");
+                    sheet.Cells[1, 2] = String.Format("Second Valut");
+                    sheet.Cells[1, 3] = String.Format("SELL");
+                    sheet.Cells[1, 4] = String.Format("BUY");
+                    sheet.Cells[1, 5] = String.Format("Date");
+                    tmpk = daycount * 4 + 1;
+                    if (filed < daycount*4)
+                    {
+                        tmpk = filed;
+                    }
+                    for (int i = 2; i <= tmpk; i++)
+                    {
+                        for (int j = 1; j <= 5; j++)
+                        {
+
+                            sheet.Cells[i, j] = String.Format(nums2[i - 2, j - 1]);
+                        }
+                    }
+
+                    workBook.SaveAs("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\tmp.xlsx");
+                    workBook.Close();
+                    ex.Quit();
+
+
+                }
+                else
+                {
+                    ExcelEz();
+                    GenerateExcelByDate(daycount);
+                }
+
+
+
+
+
+
+            //return new Task(new System.Action(()=>{ Console.WriteLine("async"); }));
+
+
+
+
+
+
+
+            //}
+            //catch(Exception ex)
+            //{
+            //    Console.WriteLine(ex.Message);
+            //}
 
 
         }
+
+
+
+
 
         static public void SendValuts(MessageEventArgs e)
         {
@@ -506,9 +715,9 @@ namespace BotVal
             }
 
 
-            if (File.Exists("C:\\Users\\admnz\\source\\repos\\Excel\\Excel\\bin\\Debug\\test.xlsx"))
+            if (System.IO.File.Exists("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\test.xlsx"))
             {
-                workBook = ex.Workbooks.Open("C:\\Users\\admnz\\source\\repos\\Excel\\Excel\\bin\\Debug\\test.xlsx");
+                workBook = ex.Workbooks.Open("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\test.xlsx");
                 sheet = ex.Worksheets.get_Item(1);
                 int tmpi = 0;
                 int filed = 0;
@@ -529,13 +738,13 @@ namespace BotVal
 
                     for (int j = 1; j <= 5; j++)
                     {
-                        Console.WriteLine("Add?");
+                      
                         string tm = String.Format(nums2[tmpi, j - 1]);
                         Console.WriteLine();
                         sheet.Cells[i, j] = tm;
                     }
                     tmpi++;
-                    tmpi = tmpi;
+                
                 }
 
                 workBook.Save();
@@ -561,16 +770,17 @@ namespace BotVal
                 sheet.Cells[1, 3] = String.Format("SELL");
                 sheet.Cells[1, 4] = String.Format("BUY");
                 sheet.Cells[1, 5] = String.Format("Date");
+
                 for (int i = 2; i <= 5; i++)
                 {
                     for (int j = 1; j <= 5; j++)
                     {
-                        Console.WriteLine("Add?");
+                        
                         sheet.Cells[i, j] = String.Format(nums2[i - 2, j - 1]);
                     }
                 }
 
-                workBook.SaveAs("C:\\Users\\admnz\\source\\repos\\Excel\\Excel\\bin\\Debug\\test.xlsx");
+                workBook.SaveAs("C:\\Users\\admnz\\source\\repos\\BotValuts\\BotVal\\BotVal\\bin\\Debug\\test.xlsx");
                 workBook.Close();
                 ex.Quit();
             }
